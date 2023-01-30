@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react'
 import Table from 'react-bootstrap/Table';
 import Pagination from 'react-bootstrap/Pagination';
 import Spinner from 'react-bootstrap/Spinner';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
 import axios from "axios"
 
 const Home = () => {
     const [data, setData] = useState([]);
+    console.log(data)
 
     const [pageData, setPageData] = useState([]);
     const [page, setPage] = useState(1);
@@ -13,25 +16,10 @@ const Home = () => {
 
     const getdata = async () => {
         const response = await axios.get("https://jsonplaceholder.typicode.com/posts");
+        // const response = await axios.get("https://dummyjson.com/products");
         setData(response.data)
     }
 
-    useEffect(() => {
-        getdata();
-
-        if (page) {
-            const pagecount = Math.ceil(data.length / 4);
-            setPageCount(pagecount);
-
-            const LIMIT = 5
-
-            const skip = LIMIT * page
-            const dataskip = data.slice(page === 1 ? 0 : skip - LIMIT, skip);
-
-            setPageData(dataskip)
-        }
-
-    }, [data])
 
     // handle next
     const handleNext = () => {
@@ -45,12 +33,32 @@ const Home = () => {
         setPage(page - 1)
     }
 
+
+    useEffect(() => {
+        getdata();
+    }, [page]);
+
+    useEffect(()=>{
+        const pagecount = Math.ceil(data.length / 5);
+        setPageCount(pagecount);
+        if (page) {
+            const LIMIT = 5
+            const skip = LIMIT * page      
+            const dataskip = data.slice(page === 1 ? 0 : skip - LIMIT, skip);
+    
+            setPageData(dataskip)
+        }
+    },[data])
+
+
+
     return (
         <>
             <div className='container'>
                 <h1>User Data</h1>
 
-                <div className='table_div'>
+
+                <div className='table_div mt-3'>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
@@ -65,11 +73,11 @@ const Home = () => {
                                     pageData.map((element, index) => {
                                         return (
                                             <>
+                                            {console.log(data)}
                                                 <tr>
                                                     <td>{element.id}</td>
                                                     <td>{element.title}</td>
-                                                    <td>{element.body}</td>
-
+                                                    <td>{element.price}</td>
                                                 </tr>
                                             </>
                                         )
@@ -80,8 +88,10 @@ const Home = () => {
                             }
                         </tbody>
                     </Table>
-                    <Pagination>
-                        <Pagination.Prev onClick={handlePrevious} />
+                 
+                </div>
+                <Pagination className='text-end'>
+                        <Pagination.Prev onClick={handlePrevious} disabled={page === 1} />
                         {
                             Array(pageCount).fill(null).map((el, index) => {
                                 return (
@@ -91,9 +101,8 @@ const Home = () => {
                                 )
                             })
                         }
-                        <Pagination.Next onClick={handleNext} />
+                        <Pagination.Next onClick={handleNext} disabled={page === pageCount} />
                     </Pagination>
-                </div>
             </div>
         </>
     )
